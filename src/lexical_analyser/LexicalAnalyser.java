@@ -49,9 +49,9 @@ public class LexicalAnalyser {
 			skipUntil=-1;
 			for(int i=0;i<item.length();i++) {
 				currentIndex= i;
-				System.out.println("current:"+ currentIndex+" skip:"+skipUntil+", char="+item.charAt(i));
+				System.out.println("current:"+ currentIndex+" skip:"+skipUntil+", char:"+item.charAt(i));
 				currentSequence= item;
-				if(i<skipUntil) {
+				if(i<=skipUntil) {
 					System.out.println("skipped!"+skipUntil+" char:"+item.charAt(i)+"\n");
 					continue;
 				}
@@ -101,6 +101,28 @@ public class LexicalAnalyser {
 			else
 				finalState("IDENTIFIER",buffer,linenum);
 		}
+		if(Character.isDigit(item)) {
+			buffer= stateDigit(Character.toString(item),item,linenum);
+			if(buffer.contains("."))
+				finalState("FLOAT",buffer,linenum);
+			else
+				finalState("INTEGER",buffer,linenum);
+		}
+	}
+
+	private String stateDigit(String buffer, char item, int linenum) {
+		if(peekElement()!="") {
+			char next= peekElement().charAt(0);
+			System.out.println("next****"+next);
+			if(Character.isDigit(next) || next=='.') {
+				buffer+=next;
+				skipUntil=currentIndex+1;
+				currentIndex++;
+				System.out.println("*************"+buffer);
+				buffer= stateDigit(buffer,next,linenum);
+			}
+		}
+		return buffer;
 	}
 
 	private boolean checkKeyword(String buffer) {
@@ -118,8 +140,8 @@ public class LexicalAnalyser {
 			char next= peekElement().charAt(0);
 			if(Character.isAlphabetic(next)) {
 				buffer+=next;
-				currentIndex++;
 				skipUntil=currentIndex+1;
+				currentIndex++;
 				System.out.println("*************"+buffer);
 				buffer= stateChar(buffer,next,linenum);
 			}
