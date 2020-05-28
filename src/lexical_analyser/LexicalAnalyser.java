@@ -45,14 +45,11 @@ public class LexicalAnalyser {
 	private void scanLine(String line, int linenum) {
 		List<String> currentLine= Arrays.asList(line.split("\\s+"));
 		for(String item : currentLine) {
-			System.out.println("\n"+item);
 			skipUntil=-1;
 			for(int i=0;i<item.length();i++) {
 				currentIndex= i;
-				System.out.println("current:"+ currentIndex+" skip:"+skipUntil+", char:"+item.charAt(i));
 				currentSequence= item;
 				if(i<=skipUntil) {
-					System.out.println("skipped!"+skipUntil+" char:"+item.charAt(i)+"\n");
 					continue;
 				}
 				else
@@ -64,7 +61,6 @@ public class LexicalAnalyser {
 	private String peekElement() {
 		if( currentIndex+1 < currentSequence.length()) {
 			int nextIndex= currentIndex+1;
-			System.out.println("nextIndex:"+nextIndex);
 			return(Character.toString(currentSequence.charAt(nextIndex)));
 		}
 		return "";
@@ -113,12 +109,10 @@ public class LexicalAnalyser {
 	private String stateDigit(String buffer, char item, int linenum) {
 		if(peekElement()!="") {
 			char next= peekElement().charAt(0);
-			System.out.println("next****"+next);
 			if(Character.isDigit(next) || next=='.') {
 				buffer+=next;
 				skipUntil=currentIndex+1;
 				currentIndex++;
-				System.out.println("*************"+buffer);
 				buffer= stateDigit(buffer,next,linenum);
 			}
 		}
@@ -142,7 +136,6 @@ public class LexicalAnalyser {
 				buffer+=next;
 				skipUntil=currentIndex+1;
 				currentIndex++;
-				System.out.println("*************"+buffer);
 				buffer= stateChar(buffer,next,linenum);
 			}
 		}
@@ -151,7 +144,6 @@ public class LexicalAnalyser {
 
 	private void finalState(String tokentype, String tokenname, int linenum) {
 		token temp= new token(tokentype,tokenname,linenum);
-		System.out.println("entered"+temp.getToken());
 		tokenList.add(temp);
 	} 
 
