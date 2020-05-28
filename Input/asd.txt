@@ -1,0 +1,9 @@
+class
+int <=main(){
+float>=1.5;
+if(a==2 && b>=2.5){
+class abc=a+1;};
+animal dog;
+return 1.5;
+int abc=0;
+}
