@@ -39,7 +39,7 @@ public class LexicalAnalyser {
 			System.out.println(item.getToken());
 		for(token item: errorList)
 			System.out.println(item.getToken());
-		System.out.println("the end");
+		System.out.println("No of tokens:"+tokenList.size());
 	}
 
 	private void scanLine(String line, int linenum) {
@@ -92,7 +92,7 @@ public class LexicalAnalyser {
 		String buffer ="";
 		if(Character.isAlphabetic(item)) {
 			buffer= stateChar(Character.toString(item),item,linenum);
-			if(checkKeyword(buffer))
+			if(isKeyword(buffer))
 				finalState("KEYWORD",buffer,linenum);
 			else
 				finalState("IDENTIFIER",buffer,linenum);
@@ -111,15 +111,26 @@ public class LexicalAnalyser {
 			char next= peekElement().charAt(0);
 			if(Character.isDigit(next) || next=='.') {
 				buffer+=next;
-				skipUntil=currentIndex+1;
-				currentIndex++;
+				updatePointer();
 				buffer= stateDigit(buffer,next,linenum);
 			}
 		}
 		return buffer;
 	}
+	
+	private String stateChar(String buffer, char item, int linenum) {
+		if(peekElement()!="") {
+			char next= peekElement().charAt(0);
+			if(Character.isAlphabetic(next)) {
+				buffer+=next;
+				updatePointer();
+				buffer= stateChar(buffer,next,linenum);
+			}
+		}
+		return buffer;
+	}
 
-	private boolean checkKeyword(String buffer) {
+	private boolean isKeyword(String buffer) {
 		if(buffer.equals("main")||buffer.equals("if")||buffer.equals("then")
 				||buffer.equals("else")||buffer.equals("return")||buffer.equals("write")
 				||buffer.equals("read")||buffer.equals("class")||buffer.equals("int")
@@ -129,29 +140,27 @@ public class LexicalAnalyser {
 			return false;
 	}
 
-	private String stateChar(String buffer, char item, int linenum) {
-		if(peekElement()!="") {
-			char next= peekElement().charAt(0);
-			if(Character.isAlphabetic(next)) {
-				buffer+=next;
-				skipUntil=currentIndex+1;
-				currentIndex++;
-				buffer= stateChar(buffer,next,linenum);
-			}
-		}
-		return buffer;
-	}
+	
 
 	private void finalState(String tokentype, String tokenname, int linenum) {
 		token temp= new token(tokentype,tokenname,linenum);
 		tokenList.add(temp);
 	} 
+	private void errorState(String errorName, String item, int linenum) {
+		token temp= new token(errorName,item,linenum);
+		errorList.add(temp);
+	}
+
+	private void updatePointer() {
+		skipUntil=currentIndex+1;
+		currentIndex++;
+	}
 
 	private void stateLEQ(String item, int linenum) {
 		String next= peekElement();
 		if(next.equals("=")) {
 			finalState("Less_Or_Equal_To","<=",linenum);
-			skipUntil=currentIndex+1;
+			updatePointer();
 		}
 		else
 			finalState("Less_Than_Operator","<",linenum);
@@ -160,7 +169,7 @@ public class LexicalAnalyser {
 		String next= peekElement();
 		if(next.equals("=")) {
 			finalState("Greater_Than_Or_Equal_To",">=",linenum);
-			skipUntil=currentIndex+1;
+			updatePointer();
 		}
 		else
 			finalState("Greater_Than_Operator",">",linenum);
@@ -169,7 +178,7 @@ public class LexicalAnalyser {
 		String next= peekElement();
 		if(next.equals("=")) {
 			finalState("Equality_Operator","==",linenum);
-			skipUntil=currentIndex+1;
+			updatePointer();
 		}
 		else
 			finalState("Assignment_Operator","=",linenum);
@@ -178,14 +187,9 @@ public class LexicalAnalyser {
 		String next= peekElement();
 		if(next.equals("&")) {
 			finalState("Logical_And_Operator","&&",linenum);
-			skipUntil=currentIndex+1;
+			updatePointer();
 		}
 		else if(next!="")
 			errorState("Invalid token: Remove this symbol to correct the error","&",linenum);
-	}
-
-	private void errorState(String errorName, String item, int linenum) {
-		token temp= new token(errorName,item,linenum);
-		errorList.add(temp);
 	}
 }
