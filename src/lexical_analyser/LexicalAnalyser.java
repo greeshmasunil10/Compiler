@@ -14,8 +14,8 @@ public class LexicalAnalyser {
 
 	private  List<token> tokenList = new ArrayList<token>(); 
 	private  List<token> errorList = new ArrayList<token>(); 
-	private int currentIndex;
-	private int skipUntil=-1;
+	private int currentPointer;
+	private int endPointer=-1;
 	private String currentSequence;
 
 	public LexicalAnalyser(String path) {
@@ -45,11 +45,11 @@ public class LexicalAnalyser {
 	private void scanLine(String line, int linenum) {
 		List<String> currentLine= Arrays.asList(line.split("\\s+"));
 		for(String item : currentLine) {
-			skipUntil=-1;
+			endPointer=-1;
 			for(int i=0;i<item.length();i++) {
-				currentIndex= i;
+				currentPointer= i;
 				currentSequence= item;
-				if(i<=skipUntil) {
+				if(i<=endPointer) {
 					continue;
 				}
 				else
@@ -59,8 +59,8 @@ public class LexicalAnalyser {
 	}
 
 	private String peekElement() {
-		if( currentIndex+1 < currentSequence.length()) {
-			int nextIndex= currentIndex+1;
+		if( currentPointer+1 < currentSequence.length()) {
+			int nextIndex= currentPointer+1;
 			return(Character.toString(currentSequence.charAt(nextIndex)));
 		}
 		return "";
@@ -140,8 +140,6 @@ public class LexicalAnalyser {
 			return false;
 	}
 
-	
-
 	private void finalState(String tokentype, String tokenname, int linenum) {
 		token temp= new token(tokentype,tokenname,linenum);
 		tokenList.add(temp);
@@ -152,8 +150,8 @@ public class LexicalAnalyser {
 	}
 
 	private void updatePointer() {
-		skipUntil=currentIndex+1;
-		currentIndex++;
+		endPointer=currentPointer+1;
+		currentPointer++;
 	}
 
 	private void stateLEQ(String item, int linenum) {
