@@ -32,7 +32,8 @@ public class driver {
 					boolean exists = Files.exists(p);
 					boolean notExists = Files.notExists(p);
 					if (notExists) {
-						System.out.println("File doesn't exist!. Enter again:");
+						System.err.println("File doesn't exist.");
+						System.out.println("Enter again:");
 						continue;
 					}
 					LexicalAnalyser obj = new LexicalAnalyser(path);
@@ -40,7 +41,7 @@ public class driver {
 				}
 			}
 			else {
-				System.out.println("Invalid choice.");
+				System.err.println("Invalid choice.");
 				continue;
 			}
 			break;

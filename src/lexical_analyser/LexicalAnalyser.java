@@ -40,7 +40,7 @@ public class LexicalAnalyser {
 			e.printStackTrace();
 		}	
 	}
-	
+
 	private void printTokens() {
 		output+="\nLEXICAL ANALYSER"+"\n";
 		output+="------------------------"+"\n";
@@ -59,6 +59,7 @@ public class LexicalAnalyser {
 	}
 
 	private void scanLine(String line, int linenum) {
+		TokenNames.init();
 		List<String> currentLine= Arrays.asList(line.split("\\s+"));
 		for(String item : currentLine) {
 			endPointer=-1;
@@ -84,21 +85,9 @@ public class LexicalAnalyser {
 
 	private void state0(char item,int linenum) {
 		switch(item) {
-		case '}': finalState("Right_Braces","}",linenum); return;
-		case '{': finalState("Left_Braces","{",linenum);return;
-		case ')': finalState("Right_Paranthesis",")",linenum); return;
-		case '(':finalState("Left_Paranthesis","(",linenum); return;
-		case '[':finalState("Left_Bracket","[",linenum); return;
-		case ']':finalState("Right_Bracket","]",linenum); return;
-		case ';':finalState("Semicolon",";",linenum); return;
-		case ',':finalState("Comma",",",linenum); return;
-		case '.':finalState("Dot_operator",".",linenum); return; 
-		case '!':finalState("Inverse","!",linenum); return;
-		case '+':finalState("Addition_Operator","+",linenum); return;
-		case '-':finalState("Subtraction_Operator","-",linenum); return;
-		case '<': stateLEQ("<",linenum);return;
-		case '>': stateGEQ(">",linenum);return;
-		case '=': statEQ(">",linenum);return;
+		case '}':case '{':case ')':case '(':case '[':case ']':case ';':
+		case ',':case '.':case '!':	case '+':case '-':finalState(Character.toString(item),linenum); return;
+		case '<':case '>':case '=': statEQ(Character.toString(item),linenum);return;
 		case '/': return;
 		case '*': return;
 		case '&': stateAnd(">",linenum);return;
@@ -135,7 +124,7 @@ public class LexicalAnalyser {
 		}
 		return buffer;
 	}
-	
+
 	private String stateChar(String buffer, char item, int linenum) {
 		if(peekElement()!="") {
 			char next= peekElement().charAt(0);
@@ -158,8 +147,12 @@ public class LexicalAnalyser {
 			return false;
 	}
 
-	private void finalState(String tokentype, String tokenname, int linenum) {
-		token temp= new token(tokentype,tokenname,linenum);
+	private void finalState(String token, int linenum) {
+		token temp= new token(TokenNames.getTokenName(token),token,linenum);
+		tokenList.add(temp);
+	} 
+	private void finalState(String tokenName,String token, int linenum) {
+		token temp= new token(tokenName,token,linenum);
 		tokenList.add(temp);
 	} 
 	private void errorState(String errorName, String item, int linenum) {
@@ -172,37 +165,19 @@ public class LexicalAnalyser {
 		currentPointer++;
 	}
 
-	private void stateLEQ(String item, int linenum) {
-		String next= peekElement();
-		if(next.equals("=")) {
-			finalState("Less_Or_Equal_To","<=",linenum);
-			updatePointer();
-		}
-		else
-			finalState("Less_Than_Operator","<",linenum);
-	}
-	private void stateGEQ(String item, int linenum) {
-		String next= peekElement();
-		if(next.equals("=")) {
-			finalState("Greater_Than_Or_Equal_To",">=",linenum);
-			updatePointer();
-		}
-		else
-			finalState("Greater_Than_Operator",">",linenum);
-	}
 	private void statEQ(String item, int linenum) {
 		String next= peekElement();
 		if(next.equals("=")) {
-			finalState("Equality_Operator","==",linenum);
+			finalState(item,linenum);
 			updatePointer();
 		}
 		else
-			finalState("Assignment_Operator","=",linenum);
+			finalState(item,linenum);
 	}
 	private void stateAnd(String item, int linenum) {
 		String next= peekElement();
 		if(next.equals("&")) {
-			finalState("Logical_And_Operator","&&",linenum);
+			finalState(item,linenum);
 			updatePointer();
 		}
 		else 
@@ -211,7 +186,7 @@ public class LexicalAnalyser {
 	private void stateOr(String item, int linenum) {
 		String next= peekElement();
 		if(next.equals("|")) {
-			finalState("Logical_OR_Operator","||",linenum);
+			finalState(TokenNames.getTokenName(item),item,linenum);
 			updatePointer();
 		}
 		else 
