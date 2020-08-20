@@ -9,17 +9,21 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import helpers.filehandler;
+
 
 public class LexicalAnalyser {
 
 	private  List<token> tokenList = new ArrayList<token>(); 
-	private  List<token> errorList = new ArrayList<token>(); 
+	private  List<token> invalidTokens = new ArrayList<token>(); 
 	private int currentPointer;
 	private int endPointer=-1;
 	private String currentSequence;
+	String output ="";
 
 	public LexicalAnalyser(String path) {
 		loadfile(path);
+		printTokens();
 	}
 
 	private void loadfile(String path) {
@@ -35,11 +39,18 @@ public class LexicalAnalyser {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}	
+	}
+	
+	private void printTokens() {
+		output+="\nLEXICAL ANALYSER"+"\n";
+		output+="------------------------"+"\n";
 		for(token item: tokenList)
-			System.out.println(item.getToken());
-		for(token item: errorList)
-			System.out.println(item.getToken());
-		System.out.println("No of tokens:"+tokenList.size());
+			output+=item.getToken()+"\n";
+		for(token item: invalidTokens)
+			output+=item.getToken();
+		output+="No of tokens:"+tokenList.size()+"\n";
+		System.out.println(output);
+		filehandler.file_writer("Lexical Analysis", output);
 	}
 
 	private void scanLine(String line, int linenum) {
@@ -146,7 +157,7 @@ public class LexicalAnalyser {
 	} 
 	private void errorState(String errorName, String item, int linenum) {
 		token temp= new token(errorName,item,linenum);
-		errorList.add(temp);
+		invalidTokens.add(temp);
 	}
 
 	private void updatePointer() {
