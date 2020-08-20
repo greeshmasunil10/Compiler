@@ -1,6 +1,19 @@
 
 LEXICAL ANALYSER
 ------------------------
+
+ERRORS
+------------------------
+line 3 :(Invalid token: Remove this symbol to correct the error,^)
+line 6 :(Invalid token: Remove this symbol to correct the error,@)
+line 7 :(Invalid token: Remove this symbol to correct the error,&)
+line 7 :(Invalid token: Remove this symbol to correct the error,|)
+line 8 :(Invalid token: Remove this symbol to correct the error,|)
+line 8 :(Invalid token: Remove this symbol to correct the error,$)
+------------------------
+
+TOKENS
+------------------------
 line 1 :(KEYWORD,class)
 line 2 :(KEYWORD,int)
 line 2 :(Less_Or_Equal_To,<=)
@@ -17,7 +30,7 @@ line 4 :(Left_Paranthesis,()
 line 4 :(IDENTIFIER,a)
 line 4 :(Equality_Operator,==)
 line 4 :(INTEGER,2)
-line 4 :(Logical_And_Operator,&&)
+line 4 :(Logical_OR_Operator,||)
 line 4 :(IDENTIFIER,b)
 line 4 :(Greater_Than_Or_Equal_To,>=)
 line 4 :(FLOAT,200.5)

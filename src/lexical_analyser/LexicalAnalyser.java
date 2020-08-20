@@ -44,10 +44,15 @@ public class LexicalAnalyser {
 	private void printTokens() {
 		output+="\nLEXICAL ANALYSER"+"\n";
 		output+="------------------------"+"\n";
+		output+="\nERRORS"+"\n";
+		output+="------------------------"+"\n";
+		for(token item: invalidTokens)
+			output+=item.getToken()+"\n";
+		output+="------------------------"+"\n";
+		output+="\nTOKENS"+"\n";
+		output+="------------------------"+"\n";
 		for(token item: tokenList)
 			output+=item.getToken()+"\n";
-		for(token item: invalidTokens)
-			output+=item.getToken();
 		output+="No of tokens:"+tokenList.size()+"\n";
 		System.out.println(output);
 		filehandler.file_writer("Lexical Analysis", output);
@@ -79,26 +84,26 @@ public class LexicalAnalyser {
 
 	private void state0(char item,int linenum) {
 		switch(item) {
-		case '}': finalState("Right_Braces","}",linenum); break;
-		case '{': finalState("Left_Braces","{",linenum);break;
-		case ')': finalState("Right_Paranthesis",")",linenum); break;
-		case '(':finalState("Left_Paranthesis","(",linenum); break;
-		case '[':finalState("Left_Bracket","[",linenum); break;
-		case ']':finalState("Right_Bracket","]",linenum); break;
-		case ';':finalState("Semicolon",";",linenum); break;
-		case ',':finalState("Comma",",",linenum); break;
-		case '.':finalState("Dot_operator",".",linenum); break; 
-		case '!':finalState("Inverse","!",linenum); break;
-		case '+':finalState("Addition_Operator","+",linenum); break;
-		case '-':finalState("Subtraction_Operator","-",linenum); break;
-		case '<': stateLEQ("<",linenum);break;
-		case '>': stateGEQ(">",linenum);break;
-		case '=': statEQ(">",linenum);break;
-		case '/': break;
-		case '*': break;
-		case '&': stateAnd(">",linenum);break;
-		case '|': break;
-		case ':': break;
+		case '}': finalState("Right_Braces","}",linenum); return;
+		case '{': finalState("Left_Braces","{",linenum);return;
+		case ')': finalState("Right_Paranthesis",")",linenum); return;
+		case '(':finalState("Left_Paranthesis","(",linenum); return;
+		case '[':finalState("Left_Bracket","[",linenum); return;
+		case ']':finalState("Right_Bracket","]",linenum); return;
+		case ';':finalState("Semicolon",";",linenum); return;
+		case ',':finalState("Comma",",",linenum); return;
+		case '.':finalState("Dot_operator",".",linenum); return; 
+		case '!':finalState("Inverse","!",linenum); return;
+		case '+':finalState("Addition_Operator","+",linenum); return;
+		case '-':finalState("Subtraction_Operator","-",linenum); return;
+		case '<': stateLEQ("<",linenum);return;
+		case '>': stateGEQ(">",linenum);return;
+		case '=': statEQ(">",linenum);return;
+		case '/': return;
+		case '*': return;
+		case '&': stateAnd(">",linenum);return;
+		case '|': stateOr(">",linenum);return;
+		case ':': return;
 		}
 		String buffer ="";
 		if(Character.isAlphabetic(item)) {
@@ -108,13 +113,15 @@ public class LexicalAnalyser {
 			else
 				finalState("IDENTIFIER",buffer,linenum);
 		}
-		if(Character.isDigit(item)) {
+		else if(Character.isDigit(item)) {
 			buffer= stateDigit(Character.toString(item),item,linenum);
 			if(buffer.contains("."))
 				finalState("FLOAT",buffer,linenum);
 			else
 				finalState("INTEGER",buffer,linenum);
 		}
+		else 
+			errorState("Invalid token: Remove this symbol to correct the error",Character.toString(item),linenum);
 	}
 
 	private String stateDigit(String buffer, char item, int linenum) {
@@ -198,7 +205,16 @@ public class LexicalAnalyser {
 			finalState("Logical_And_Operator","&&",linenum);
 			updatePointer();
 		}
-		else if(next!="")
+		else 
 			errorState("Invalid token: Remove this symbol to correct the error","&",linenum);
+	}
+	private void stateOr(String item, int linenum) {
+		String next= peekElement();
+		if(next.equals("|")) {
+			finalState("Logical_OR_Operator","||",linenum);
+			updatePointer();
+		}
+		else 
+			errorState("Invalid token: Remove this symbol to correct the error","|",linenum);
 	}
 }
