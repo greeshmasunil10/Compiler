@@ -1,0 +1,134 @@
+prog 			->     classDeclSet    funcDefSet   'main'   funcBody ';'
+
+classDeclSet		-> classDecl classDeclSet
+classDeclSet		-> EPSILON
+funcDefSet 		-> funcDef funcDefSet
+funcDefSet 		-> EPSILON
+
+classDecl 		->  'class'   'id'   inheritedfuncs '{ '  classBody '}' ';'
+inheritedfuncs		-> ':'   'id' inheritedFuncSet
+inheritedfuncs		-> EPSILON
+inheritedFuncSet	-> ','   'id' inheritedFuncSet
+inheritedFuncSet	-> EPSILON
+
+classBody		-> type   'id' VarAndFuncDecl
+classBody		-> EPSILON
+VarAndFuncDecl		->   varDecl classBody
+VarAndFuncDecl	->   funcDecl otherFuncDecl
+varDecl 			->   arraySizeList ';'
+otherFuncDecl			-> type   'id' otherFuncDeclrecursion
+otherFuncDeclrecursion		->   funcDecl otherFuncDecl
+otherFuncDecl			-> EPSILON
+funcDecl 			->   '(' fParamsSet ')' ';'
+
+funcDef 			->   funcHead   funcBody ;
+funcHead 			-> type funcName   '(' fParamsSet ')'
+funcName 			->   'id' scopeandFunc
+scopeandFunc 		->   'sr'   'id'
+scopeandFunc 		-> EPSILON
+
+funcBody 			-> '{' funcStatements '}'
+funcStatements		-> varStat funcStatements
+funcStatements		-> varStatNew funcStatNew
+funcStatements		-> EPSILON
+funcStatNew	-> varStatNew funcStatNew
+funcStatNew	-> EPSILON
+varStat				-> typefloatorint   'id'   varDecl
+typefloatorint				->   'float'
+typefloatorint				->   'integer'
+varStatNew			->   'id' varStatTail
+varStatNew			-> statementOther
+varStatTail			->   'id'   varDecl
+varStatTail			->  indiceList idnestList ';'
+varStatTail			->     '(' aParams ')' idnestList assignStatTail ';'
+varStatTail    -> '=' idornum ';'
+idornum -> 'intNum'
+idornum -> 'id' arraySizeList 
+
+assignStatTail		-> assignOp   expr
+
+statementOther		->   'if' '(' expr ')' 'then'   statBlock   'else'   statBlock   ';'
+statementOther		->   'for' '(' type   'id'  assignOp   expr     ';' id relop id ';' assignStat ')'   statBlock   ';'
+statementOther		->  'read' '(' variable ')' ';'
+statementOther		->   'write' '(' expr ')' ';'
+statementOther		->   'return' '(' expr ')' ';'
+statementList 		-> statement statementList
+statementList 		-> EPSILON
+
+arraySizeList		-> arraySize arraySizeList
+arraySizeList		-> EPSILON
+statement 			-> assignStat ';'
+statement 			->   'if' '(' expr ')' 'then'   statBlock   'else'   statBlock   ';'
+statement 			->   'for' '(' type   'id'  assignOp   expr     ';' relExpr ';' assignStat ')'   statBlock   ';'
+statement 			->   'read' '(' variable ')' ';'
+statement 			->   'write' '(' expr ')' ';'
+statement 			->   'return' '(' expr ')' ';'
+assignStat 			-> variable   assignOp   expr
+statBlock 			-> '{' statementList '}'
+statBlock 			-> statement
+statBlock 			-> EPSILON
+expr 				-> arithExpr exprNew
+exprNew 			-> EPSILON
+exprNew 			->   relOp arithExpr 
+relExpr 			-> arithExpr   relOp arithExpr
+arithExpr 			-> term arithExprNew
+arithExprNew 		->   addOp term arithExprNew
+arithExprNew 		-> EPSILON
+sign 				-> '+'
+sign 				-> '-'
+term 				-> factor termNew
+termNew 			->   multOp factor termNew
+termNew 			-> EPSILON
+factor 				-> varFunc
+factor 				->   intNum
+factor 				->   floatNum
+factor 				-> 	'(' arithExpr ')'
+factor 				-> 'not' factor
+factor 				-> sign factor
+variable 			->   id   variableNew
+variableNew			->   indiceList idnestList
+variableNew			-> '(' aParams ')' idnestList
+variableNew         -> EPSILON
+varFunc 			->   id     indiceList idnestListNew varFuncTail
+varFuncTail			->   '(' aParams ')'  varFuncTail2
+varFuncTail			-> EPSILON
+varFuncTail2		-> idnest
+varFuncTail2		-> EPSILON
+idnestListNew		-> idnestNew idnestListNew
+idnestListNew		-> EPSILON
+indiceList			-> indice indiceList
+indiceList			-> EPSILON
+idnestNew 			-> '.' idnestNewTail
+idnestNewTail		->   'id' indiceList
+idnestNewTail		-> '(' aParams ')'
+indice 				-> '[' arithExpr ']'
+idnestList			-> idnest idnestList
+idnestList			-> EPSILON
+idnest 				-> '.'   'id' indiceList
+arraySize 			-> '['   intNum ']'
+type 				->   'integer'
+type 				->   'float'
+type 				->   'id'
+fParamsSet 			->    type   'id'   arraySizeList     fParamsTailList
+fParamsSet 			-> EPSILON
+fParamsTailList		->   fParamsTail   fParamsTailList
+fParamsTailList		-> EPSILON
+aParams 			-> expr aParamsTailList
+aParams 			-> EPSILON
+aParamsTailList		-> aParamsTail aParamsTailList
+aParamsTailList		-> EPSILON
+fParamsTail 		-> ',' type   'id'   arraySizeList
+aParamsTail 		-> ',' expr
+assignOp 			-> '='
+relOp 				->   'eq'
+relOp 				->   'neq'
+relOp 				->   'lt'
+relOp 				->   'gt'
+relOp 				->   'leq'
+relOp 				->   'geq'
+addOp 				->   '+'
+addOp 				->   '-'
+addOp 				->   'or'
+multOp 				->   '*'
+multOp 				->   '/'
+multOp 				->   'and'

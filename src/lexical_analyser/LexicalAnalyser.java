@@ -14,8 +14,8 @@ import helpers.filehandler;
 
 public class LexicalAnalyser {
 
-	private  List<token> tokenList = new ArrayList<token>(); 
-	private  List<token> invalidTokens = new ArrayList<token>(); 
+	private  List<Token> tokenList = new ArrayList<Token>(); 
+	private  List<Token> invalidTokens = new ArrayList<Token>(); 
 	private int currentPointer;
 	private int endPointer=-1;
 	private String currentSequence;
@@ -46,13 +46,13 @@ public class LexicalAnalyser {
 		output+="------------------------"+"\n";
 		output+="\nERRORS"+"\n";
 		output+="------------------------"+"\n";
-		for(token item: invalidTokens)
-			output+=item.getToken()+"\n";
+		for(Token item: invalidTokens)
+			output+=item.toString()+"\n";
 		output+="------------------------"+"\n";
 		output+="\nTOKENS"+"\n";
 		output+="------------------------"+"\n";
-		for(token item: tokenList)
-			output+=item.getToken()+"\n";
+		for(Token item: tokenList)
+			output+=item.toString()+"\n";
 		output+="No of tokens:"+tokenList.size()+"\n";
 		System.out.println(output);
 		filehandler.file_writer("Lexical Analysis", output);
@@ -90,9 +90,7 @@ public class LexicalAnalyser {
 		case '<':case '>':case '=': statEQ(Character.toString(item),linenum);return;
 		case '/': return;
 		case '*': return;
-		case '&': stateAnd(">",linenum);return;
-		case '|': stateOr(">",linenum);return;
-		case ':': return;
+		case '&':case '|': logicalOpState(Character.toString(item),linenum);return;
 		}
 		String buffer ="";
 		if(Character.isAlphabetic(item)) {
@@ -148,15 +146,15 @@ public class LexicalAnalyser {
 	}
 
 	private void finalState(String token, int linenum) {
-		token temp= new token(TokenNames.getTokenName(token),token,linenum);
+		Token temp= new Token(TokenNames.getTokenName(token),token,linenum);
 		tokenList.add(temp);
 	} 
 	private void finalState(String tokenName,String token, int linenum) {
-		token temp= new token(tokenName,token,linenum);
+		Token temp= new Token(tokenName,token,linenum);
 		tokenList.add(temp);
 	} 
 	private void errorState(String errorName, String item, int linenum) {
-		token temp= new token(errorName,item,linenum);
+		Token temp= new Token(errorName,item,linenum);
 		invalidTokens.add(temp);
 	}
 
@@ -168,28 +166,19 @@ public class LexicalAnalyser {
 	private void statEQ(String item, int linenum) {
 		String next= peekElement();
 		if(next.equals("=")) {
-			finalState(item,linenum);
+			finalState(item+"=",linenum);
 			updatePointer();
 		}
 		else
 			finalState(item,linenum);
 	}
-	private void stateAnd(String item, int linenum) {
+	private void logicalOpState(String item, int linenum) {
 		String next= peekElement();
-		if(next.equals("&")) {
-			finalState(item,linenum);
+		if(next.equals(item)) {
+			finalState(item+item,linenum);
 			updatePointer();
 		}
 		else 
-			errorState("Invalid token: Remove this symbol to correct the error","&",linenum);
-	}
-	private void stateOr(String item, int linenum) {
-		String next= peekElement();
-		if(next.equals("|")) {
-			finalState(TokenNames.getTokenName(item),item,linenum);
-			updatePointer();
-		}
-		else 
-			errorState("Invalid token: Remove this symbol to correct the error","|",linenum);
+			errorState("Invalid token: Remove this symbol to correct the error",item,linenum);
 	}
 }
