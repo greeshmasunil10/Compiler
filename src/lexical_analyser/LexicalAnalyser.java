@@ -14,16 +14,20 @@ import helpers.filehandler;
 
 public class LexicalAnalyser {
 
-	private  List<Token> tokenList = new ArrayList<Token>(); 
+	private static  List<Token> tokenList = new ArrayList<Token>(); 
 	private  List<Token> invalidTokens = new ArrayList<Token>(); 
 	private int currentPointer;
 	private int endPointer=-1;
 	private String currentSequence;
 	String output ="";
 
-	public LexicalAnalyser(String path) {
+	public void Tokenise(String path) {
 		loadfile(path);
 		printTokens();
+	}
+	
+	public static List<Token> getTokens(){
+		return tokenList;
 	}
 
 	private void loadfile(String path) {
@@ -56,6 +60,7 @@ public class LexicalAnalyser {
 		output+="No of tokens:"+tokenList.size()+"\n";
 		System.out.println(output);
 		filehandler.file_writer("Lexical Analysis", output);
+		tokenList.add(new Token("$","$",0));
 	}
 
 	private void scanLine(String line, int linenum) {
@@ -98,7 +103,7 @@ public class LexicalAnalyser {
 			if(isKeyword(buffer))
 				finalState("KEYWORD",buffer,linenum);
 			else
-				finalState("IDENTIFIER",buffer,linenum);
+				finalState("IDENTIFIER","id",linenum);
 		}
 		else if(Character.isDigit(item)) {
 			buffer= stateDigit(Character.toString(item),item,linenum);
@@ -138,7 +143,7 @@ public class LexicalAnalyser {
 	private boolean isKeyword(String buffer) {
 		if(buffer.equals("main")||buffer.equals("if")||buffer.equals("then")
 				||buffer.equals("else")||buffer.equals("return")||buffer.equals("write")
-				||buffer.equals("read")||buffer.equals("class")||buffer.equals("int")
+				||buffer.equals("read")||buffer.equals("class")||buffer.equals("integer")
 				||buffer.equals("float")||buffer.equals("for"))
 			return true;
 		else

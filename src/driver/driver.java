@@ -3,7 +3,9 @@ package driver;
 import java.nio.file.*;
 import java.util.*;
 
+
 import lexical_analyser.LexicalAnalyser;
+import parser.Parser;
 
 public class driver {
 
@@ -36,7 +38,10 @@ public class driver {
 						System.out.println("Enter again:");
 						continue;
 					}
-					LexicalAnalyser obj = new LexicalAnalyser(path);
+					LexicalAnalyser lex = new LexicalAnalyser();
+					lex.Tokenise(path);
+					Parser p1 =new Parser();
+					p1.startParsing();
 					break;
 				}
 			}

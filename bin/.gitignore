@@ -1,4 +1,4 @@
-/helpers/
-/lexical_analyser/
-/driver/
 /parser/
+/driver/
+/lexical_analyser/
+/helpers/

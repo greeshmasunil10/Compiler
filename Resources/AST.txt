@@ -1,0 +1,29 @@
+           Node               |            Kind          |            Name               |  Data     |  Type     |      ParentNode     |        Children
+_____________________________________________________________________________________________
+           prog               |              NT          |                               |           |           |       no parent     |
+           main               |            main          |         KEYWORD               |           |           |            prog     |
+       funcBody               |              NT          |                               |           |           |            prog     |
+              {               |               {          |     Left Braces               |           |           |        funcBody     |
+ funcStatements               |              NT          |                               |           |           |        funcBody     |
+        varStat               |              NT          |                               |           |           |  funcStatements     |
+ typefloatorint               |              NT          |                               |           |           |         varStat     |
+        integer               |         integer          |         KEYWORD               |           |           |  typefloatorint     |
+             id               |              id          |      IDENTIFIER               |           |           |         varStat     |
+        varDecl               |              NT          |                               |           |           |         varStat     |
+              ;               |               ;          |       Semicolon               |           |           |         varDecl     |
+ funcStatements               |              NT          |                               |           |           |  funcStatements     |
+        varStat               |              NT          |                               |           |           |  funcStatements     |
+ typefloatorint               |              NT          |                               |           |           |         varStat     |
+        integer               |         integer          |         KEYWORD               |           |           |  typefloatorint     |
+             id               |              id          |      IDENTIFIER               |           |           |         varStat     |
+        varDecl               |              NT          |                               |           |           |         varStat     |
+              ;               |               ;          |       Semicolon               |           |           |         varDecl     |
+ funcStatements               |              NT          |                               |           |           |  funcStatements     |
+        varStat               |              NT          |                               |           |           |  funcStatements     |
+ typefloatorint               |              NT          |                               |           |           |         varStat     |
+        integer               |         integer          |         KEYWORD               |           |           |  typefloatorint     |
+             id               |              id          |      IDENTIFIER               |           |           |         varStat     |
+        varDecl               |              NT          |                               |           |           |         varStat     |
+              ;               |               ;          |       Semicolon               |           |           |         varDecl     |
+              }               |               }          |    Right Braces               |           |           |        funcBody     |
+              ;               |               ;          |       Semicolon               |           |           |            prog     |

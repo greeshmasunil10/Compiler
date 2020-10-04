@@ -1,0 +1,20 @@
+classDeclSet		-> EPSILON
+funcDefSet 		-> EPSILON
+typefloatorint				->   'integer'
+arraySizeList		-> EPSILON
+varDecl 			->   arraySizeList ';'
+varStat				-> typefloatorint   'id'   varDecl
+typefloatorint				->   'integer'
+arraySizeList		-> EPSILON
+varDecl 			->   arraySizeList ';'
+varStat				-> typefloatorint   'id'   varDecl
+typefloatorint				->   'integer'
+arraySizeList		-> EPSILON
+varDecl 			->   arraySizeList ';'
+varStat				-> typefloatorint   'id'   varDecl
+funcStatements		-> EPSILON
+funcStatements		-> varStat funcStatements
+funcStatements		-> varStat funcStatements
+funcStatements		-> varStat funcStatements
+funcBody 			-> '{' funcStatements '}'
+prog ->     classDeclSet    funcDefSet   'main'   funcBody ';'
