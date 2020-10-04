@@ -42,7 +42,6 @@ public class ASTNode {
 //		children=null;
 	}
 	public ASTNode(String pname, String pkind) {
-		
 		NodeName = pname;
 		kind = pkind;
 		type=data="";

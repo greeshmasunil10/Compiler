@@ -2,10 +2,12 @@ package parser;
  	import java.io.IOException;
 import java.util.*;
 
+import helpers.contentTable;
 import helpers.filehandler;
 
 public class ASTree {
 	filehandler ast_file;
+	static contentTable tableObj= new contentTable();
 	ASTNode root;
 	ASTNode tnode;
 	ArrayList<ASTNode> varStatNew= new ArrayList<>();
@@ -13,14 +15,14 @@ public class ASTree {
 	ArrayList<ASTNode> fparmsNode= new ArrayList<>();
 	ArrayList<ASTNode> varDeclNode= new ArrayList<>();
 
-	
-
 	static int inc = 0;
 	int savescopekey;
 
 	public ASTree() {
 		root = null;
 		tnode = null;
+		ArrayList<String> header= new ArrayList<>(Arrays.asList("Node","Kind","Name","Parent Node"));
+		tableObj.addHeader(header);
 		ast_file = new filehandler("Resources/AST.txt");
 		ast_file.writeLine(String.format("%15s %15s %15s %10s %15s %15s %5s %5s %5s %5s %15s %5s %15s", "Node", "|", "Kind",
 				"|", "Name", "|", "Data", "|", "Type", "|", "ParentNode", "|", "Children"));
@@ -42,6 +44,8 @@ public class ASTree {
 			tnode = node;
 			ast_file.writeString(String.format("%15s %15s %15s %10s %15s %15s %5s %5s %5s %5s %15s %5s", node.NodeName, "|",
 					node.kind, "|", node.IDName, "|", node.data, "|", node.type, "|", "no parent", "|"));
+			ArrayList<String> row= new ArrayList<>(Arrays.asList(node.NodeName, node.kind, node.IDName, "no parent"));
+			tableObj.addRow(row);
 
 		} else {
 			tnode.children.add(node);
@@ -51,6 +55,8 @@ public class ASTree {
 			godown(node);
 			ast_file.writeString(String.format("%15s %15s %15s %10s %15s %15s %5s %5s %5s %5s %15s %5s", node.NodeName, "|",
 					node.kind, "|", node.IDName, "|", node.data, "|", node.type, "|", node.parent.NodeName, "|"));
+			ArrayList<String> row= new ArrayList<>(Arrays.asList(node.NodeName, node.kind, node.IDName, node.parent.NodeName));
+			tableObj.addRow(row);
 
 		}
 		for (ASTNode child : tnode.children)
@@ -74,9 +80,8 @@ public class ASTree {
 			tnode = node;
 			ast_file.writeString(String.format("%15s %15s %15s %10s %15s %15s %5s %5s %5s %5s %15s %5s", node.NodeName, "|",
 					node.kind, "|", node.IDName, "|", node.data, "|", node.type, "|", "no parent", "|"));
-			String data[][],column[];
-//			data[data.length]= {node.NodeName, node.kind, node.IDName, node.data, node.type, "no parent"};
-//			filehandler.makeTable(data, column);
+			ArrayList<String> row= new ArrayList<>(Arrays.asList(node.NodeName, node.kind, node.IDName, "no parent"));
+			tableObj.addRow(row);
 
 		} else {
 			tnode.children.add(node);
@@ -86,6 +91,8 @@ public class ASTree {
 			godown(node);
 			ast_file.writeString(String.format("%15s %15s %15s %10s %15s %15s %5s %5s %5s %5s %15s %5s", node.NodeName, "|",
 					node.kind, "|", node.IDName, "|", node.data, "|", node.type, "|", node.parent.NodeName, "|"));
+			ArrayList<String> row= new ArrayList<>(Arrays.asList(node.NodeName, node.kind, node.IDName, node.parent.NodeName));
+			tableObj.addRow(row);
 
 		}
 		for (ASTNode child : tnode.children)

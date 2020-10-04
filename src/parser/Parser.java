@@ -62,6 +62,7 @@ public class Parser {
 		{
 			System.out.println("No errors!");
 			WriteErrors("Syntax Analysis succes. No errors found");
+			ASTree.tableObj.makeTable("AST Tree Nodes");
 		}
 		else
 		{
@@ -147,7 +148,9 @@ private boolean Errorcheck(List<String>  FIRST) {
 			//result[m]=look; m++;
 			matchedTokens[NoOfMatchedTokens]=lookahead; NoOfMatchedTokens++;
 			if(lookahead!="$") {
-			 tree.addNode(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),LexicalAnalyser.getTokens().get(TokenNumber).getName(),Integer.toString(LexicalAnalyser.getTokens().get(TokenNumber).getLineNum()));
+			 tree.addNode(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),
+					 LexicalAnalyser.getTokens().get(TokenNumber).getName(),
+					 Integer.toString(LexicalAnalyser.getTokens().get(TokenNumber).getLineNum()));
 			 tree.goup();
 			}
 			lookahead=getNext();
@@ -166,7 +169,8 @@ private boolean Errorcheck(List<String>  FIRST) {
 			//result[m]=look; m++;
 			matchedTokens[NoOfMatchedTokens]=lookahead; NoOfMatchedTokens++;
 			if(lookahead!="$") {
-				 tree.addNode(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),LexicalAnalyser.getTokens().get(TokenNumber).getToken());
+				 tree.addNode(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),
+						 LexicalAnalyser.getTokens().get(TokenNumber).getToken());
 				 tree.goup();
 				}
 			lookahead=getNext();
