@@ -47,19 +47,24 @@ public class filehandler {
 	            iox.printStackTrace();
 	        }
 	}
-	public static void makeTable(String data[][], String column[]) {
-			JFrame f;    
-		    f=new JFrame();    
-//		    String data1[][]={ {"101","Amit","670000"},    
-//		                          {"102","Jai","780000"},    
-//		                          {"101","Sachin","700000"}};    
-//		    String column1[]={"ID","NAME","SALARY"};         
-		    JTable jt=new JTable(data,column);    
-		    jt.setBounds(30,40,200,300);          
-		    JScrollPane sp=new JScrollPane(jt);    
-		    f.add(sp);          
-		    f.setSize(300,400);    
-		    f.setVisible(true);    
-	}
-//	public static void finishTable()
+	public void saveTable(JTable table)throws Exception
+	{
+	  for(int i = 0 ; i < table.getColumnCount() ; i++)
+	  {
+	    bw.write(table.getColumnName(i));
+	    bw.write("\t\t\t\t");
+	  }
+
+	  for (int i = 0 ; i < table.getRowCount(); i++)
+	  {
+	    bw.newLine();
+	    for(int j = 0 ; j < table.getColumnCount();j++)
+	    {
+	      bw.write((String)(table.getValueAt(i,j)));
+	      bw.write("\t\t\t\t");;
+	    }
+	  }
+	  bw.close();
+	}	
+
 }

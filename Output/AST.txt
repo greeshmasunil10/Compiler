@@ -1,0 +1,28 @@
+Node				Kind				Token				Parent Node				Line				
+prog				NT				 				no parent								
+main				main				KEYWORD				prog				1				
+funcBody				NT								prog								
+{				{				Left Braces				funcBody				1				
+funcStatements				NT								funcBody								
+varStat				NT								funcStatements								
+typefloatorint				NT								varStat								
+integer				integer				KEYWORD				typefloatorint				2				
+id				id				IDENTIFIER				varStat				2				
+varDecl				NT								varStat								
+;				;				Semicolon				varDecl				2				
+funcStatements				NT								funcStatements								
+varStat				NT								funcStatements								
+typefloatorint				NT								varStat								
+integer				integer				KEYWORD				typefloatorint				3				
+id				id				IDENTIFIER				varStat				3				
+varDecl				NT								varStat								
+;				;				Semicolon				varDecl				3				
+funcStatements				NT								funcStatements								
+varStat				NT								funcStatements								
+typefloatorint				NT								varStat								
+integer				integer				KEYWORD				typefloatorint				4				
+id				id				IDENTIFIER				varStat				4				
+varDecl				NT								varStat								
+;				;				Semicolon				varDecl				4				
+}				}				Right Braces				funcBody				5				
+;				;				Semicolon				prog				5				
