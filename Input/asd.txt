@@ -1,5 +1,10 @@
 main{
-integer a;
-integer b;
-integer c;
+float marks;
+float total;
+integer gpa;
+marks=500;	
+total=9;
+
+gpa=5;
+
 };

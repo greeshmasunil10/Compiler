@@ -1,6 +1,5 @@
 package parser;
 
-import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,21 +11,21 @@ import java.util.List;
 import lexical_analyser.LexicalAnalyser;
 
 public class Parser {
-	static ASTree tree= new ASTree();
+	static ParseTree parse_tree= new ParseTree();
 	static int TokenNumber=0;
 	static int NoOfMatchedTokens=0;
 	static String lookahead;
 	private static BufferedWriter DerivationsBuffer,SyntaxErrorBuffer;
 	private static BufferedWriter ASTBuffer,SymbolTableBuffer;
 	static String[] matchedTokens= new String[10000];
-	ASTNode prognode;
+	TreeNode prognode;
 
 	public Parser() {
 
 	}
 
 	public void startParsing() {
-		tree.addNode("prog","NT"," ","");
+		parse_tree.addNodeAsTerminal("prog","NT","","");
 		lookahead=LexicalAnalyser.getTokens().get(TokenNumber).getToken();
 		File f1= new File("Resources/SyntaxDerivations.txt");
 		try {
@@ -57,7 +56,11 @@ public class Parser {
 		{
 			System.out.println("No errors!");
 			WriteErrors("Syntax Analysis succes. No errors found");
-			ASTree.ASTTable.showTable("AST Tree Nodes");
+			parse_tree.current_ast_node=new TreeNode(parse_tree.parse_root);
+			parse_tree.ast_root=parse_tree.current_ast_node;
+			System.out.println("AST tree:-");
+			parse_tree.traverse(parse_tree.parse_root);
+			parse_tree.parse_table.showTable("Parse Tree Nodes");
 		}
 		else
 		{
@@ -142,10 +145,10 @@ public class Parser {
 			//result[m]=look; m++;
 			matchedTokens[NoOfMatchedTokens]=lookahead; NoOfMatchedTokens++;
 			if(lookahead!="$") {
-				tree.addNode(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),
+				parse_tree.addNodeAsTerminal(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),
 						LexicalAnalyser.getTokens().get(TokenNumber).getName(),
 						Integer.toString(LexicalAnalyser.getTokens().get(TokenNumber).getLineNum()));
-				tree.goUp();
+				parse_tree.goUp();
 			}
 			lookahead=getNext();
 			return true;
@@ -162,9 +165,9 @@ public class Parser {
 			//result[m]=look; m++;
 			matchedTokens[NoOfMatchedTokens]=lookahead; NoOfMatchedTokens++;
 			if(lookahead!="$") {
-				tree.addNode(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),
-						LexicalAnalyser.getTokens().get(TokenNumber).getToken(),"");
-				tree.goUp();
+				parse_tree.addNodeAsNT(lookahead, LexicalAnalyser.getTokens().get(TokenNumber).getToken(),
+						LexicalAnalyser.getTokens().get(TokenNumber).getToken());
+				parse_tree.goUp();
 			}
 			lookahead=getNext();
 			return true;
@@ -232,12 +235,12 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("classDeclSet","NT","","");
+			parse_tree.addNodeAsNT("classDeclSet","NT","");
 			if( classDecl() && classDeclSet()) {
 				System.out.println("classDeclSet -> classDecl classDeclSet");
 				WriteDerivation("classDeclSet -> classDecl classDeclSet");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -263,11 +266,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcDefSet","NT","","");
+			parse_tree.addNodeAsNT("funcDefSet","NT","");
 			if( funcDef() && funcDefSet()) {
 				WriteDerivation("funcDefSet 		-> funcDef funcDefSet");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -287,11 +290,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("classDecl","NT","","");
+			parse_tree.addNodeAsNT("classDecl","NT","");
 			if( matchTerminal("class") &&  matchTerminal("id")  && inheritedfuncs() && matchTerminal("{") &&  classBody() &&  matchTerminal("}") && matchTerminal(";")) {
 				WriteDerivation("classDecl 		->  'class'   'id'   inheritedfuncs '{ '  classBody '}' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -306,11 +309,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("inheritedfuncs","NT","","");
+			parse_tree.addNodeAsNT("inheritedfuncs","NT","");
 			if(matchTerminal(":") && matchTerminal("id") && inheritedFuncSet()) {
 				WriteDerivation("inheritedfuncs		-> ':'   'id' inheritedFuncSet");
 				System.out.println("look :" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		} 
@@ -332,11 +335,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("inheritedfuncSet","NT","","");
+			parse_tree.addNodeAsNT("inheritedfuncSet","NT","");
 			if(matchTerminal(",") && matchTerminal("id") && inheritedFuncSet()) {
 				WriteDerivation("inheritedFuncSet	-> ','   'id' inheritedFuncSet");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -358,11 +361,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("classBody","NT","","");
+			parse_tree.addNodeAsNT("classBody","NT","");
 			if(type() &&   matchTerminal("id") &&  VarAndFuncDecl()) {
 				WriteDerivation("classBody		-> type   'id' VarAndFuncDecl");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -387,11 +390,11 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("VarAndFuncDecl","NT","","");
+			parse_tree.addNodeAsNT("VarAndFuncDecl","NT","");
 			if(varDecl() && classBody()) {
 				WriteDerivation("VarAndFuncDecl		->   varDecl classBody");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -400,7 +403,7 @@ public class Parser {
 			if(funcDecl() && otherFuncDecl()) {
 				WriteDerivation("VarAndFuncDecl	->   funcDecl otherFuncDecl");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -414,12 +417,12 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("varDecl","NT","","");
-			tree.varDeclNode.add(tree.currentNode);
+			parse_tree.addNodeAsNT("varDecl","NT","");
+			parse_tree.varDeclNode.add(parse_tree.current_parse_node);
 			if( arraySizeList() && matchTerminal(";")) {
 				WriteDerivation("varDecl 			->   arraySizeList ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -434,11 +437,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("otherFuncDecl","NT","","");
+			parse_tree.addNodeAsNT("otherFuncDecl","NT","");
 			if(type() &&  matchTerminal("id") && otherFuncDeclrecursion()) {
 				WriteDerivation("otherFuncDecl			-> type   'id' otherFuncDeclrecursion");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -459,11 +462,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("otherFuncDeclrecursion","NT","","");
+			parse_tree.addNodeAsNT("otherFuncDeclrecursion","NT","");
 			if(funcDecl() && otherFuncDecl()) {
 				WriteDerivation("otherFuncDeclrecursion		->   funcDecl otherFuncDecl");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -477,11 +480,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcDecl","NT","","");
+			parse_tree.addNodeAsNT("funcDecl","NT","");
 			if(matchTerminal("(") && fParamsSet() && matchTerminal(")") && matchTerminal(";")) {
 				WriteDerivation("funcDecl 			->   '(' fParamsSet ')' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -495,11 +498,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcDef","NT","","");
+			parse_tree.addNodeAsNT("funcDef","NT","");
 			if(funcHead() &&   funcBody() && matchTerminal(";")) {
 				WriteDerivation("funcDef 			->   funcHead   funcBody ;");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -513,11 +516,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcHead","NT","","");
+			parse_tree.addNodeAsNT("funcHead","NT","");
 			if(type() && funcName() &&   matchTerminal("(") && fParamsSet() && matchTerminal(")") ) {
 				WriteDerivation("funcHead 			-> type funcName   '(' fParamsSet ')'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -530,11 +533,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcName","NT","","");
+			parse_tree.addNodeAsNT("funcName","NT","");
 			if( matchTerminal("id") && scopeandFunc() ) {
 				WriteDerivation("funcName 			->   'id' scopeandFunc");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -549,11 +552,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("scopeandFunc","NT","","");
+			parse_tree.addNodeAsNT("scopeandFunc","NT","");
 			if(matchTerminal("sr")  && matchTerminal("id")) {
 				WriteDerivation("scopeandFunc 		->   'sr'   'id'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -573,11 +576,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcBody","NT","","");
+			parse_tree.addNodeAsNT("funcBody","NT","");
 			if(matchTerminal("{") && funcStatements() & matchTerminal("}") ) {
 				WriteDerivation("funcBody 			-> '{' funcStatements '}'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -597,21 +600,21 @@ public class Parser {
 		Errorcheck(First,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcStatements","NT","","");
+			parse_tree.addNodeAsNT("funcStatements","NT","");
 			if(varStat() && funcStatements()) {
 				WriteDerivation("funcStatements		-> varStat funcStatements");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("funcStatements","NT","","");
+			parse_tree.addNodeAsNT("funcStatements","NT","");
 			if(varStatNew() && funcStatNew()) {
 				WriteDerivation("funcStatements		-> varStatNew funcStatNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(Follow1))
@@ -632,11 +635,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcStatNew","NT","","");
+			parse_tree.addNodeAsNT("funcStatNew","NT","");
 			if(varStatNew() && funcStatNew()) {
 				WriteDerivation("funcStatNew	-> varStatNew funcStatNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -656,11 +659,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("varStat","NT","","");
+			parse_tree.addNodeAsNT("varStat","NT","");
 			if(typefloatorint() &&   matchTerminal("id") &&   varDecl() ) {
 				WriteDerivation("varStat				-> typefloatorint   'id'   varDecl");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -678,21 +681,21 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("typefloatorint","NT","","");
+			parse_tree.addNodeAsNT("typefloatorint","NT","");
 			if(matchTerminal("float")) {
 				WriteDerivation("typefloatorint				->   'float'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("typefloatorint","NT","","");
+			parse_tree.addNodeAsNT("typefloatorint","NT","");
 			if(matchTerminal("integer")) {
 				WriteDerivation("typefloatorint				->   'integer'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -710,22 +713,22 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("varStatNew","NT","","");
-			tree.varStatNew.add(tree.currentNode);
+			parse_tree.addNodeAsNT("varStatNew","NT","");
+			parse_tree.varStatNew.add(parse_tree.current_parse_node);
 			if(matchTerminal("id") && varStatTail()) {
 				WriteDerivation("varStatNew			->   'id' varStatTail");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("varStatNew","NT","","");
+			parse_tree.addNodeAsNT("varStatNew","NT","");
 			if(statementOther()) {
 				WriteDerivation("varStatNew			-> statementOther");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -749,47 +752,47 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("varStatTail","NT","","");
+			parse_tree.addNodeAsNT("varStatTail","NT","");
 			//			tree.varStatTail.add(tree.tnode);
 			if(matchTerminal("id") &&   varDecl()) {
 				WriteDerivation("varStatTail			->   'id'   varDecl");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("varStatTail","NT","","");
+			parse_tree.addNodeAsNT("varStatTail","NT","");
 			//			tree.varStatTail.add(tree.tnode);
 			if(indiceList() && idnestList() && matchNT(";")) {
 				WriteDerivation("varStatTail			->  indiceList idnestList ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}	
 
 		}else if(isLookin(First3))
 		{
-			tree.addNode("varStatTail","NT","","");
+			parse_tree.addNodeAsNT("varStatTail","NT","");
 			//			tree.varStatTail.add(tree.tnode);
 			if(matchNT("(") && aParams() && matchNT(")") && idnestList() && assignStatTail() && matchNT(";")) {
 				WriteDerivation("varStatTail			->     '(' aParams ')' idnestList assignStatTail ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 
 		}
 		if(isLookin(First4))
 		{
-			tree.addNode("varStatTail","NT","","");
-			tree.exprNode.add(tree.currentNode);
+			parse_tree.addNodeAsNT("varStatTail","NT","");
+			parse_tree.exprNode.add(parse_tree.current_parse_node);
 
 			if(matchTerminal("=") && expr() && matchTerminal(";")) {
 				WriteDerivation("varStatTail    -> '=' idornum ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			} 
 		}
@@ -811,20 +814,20 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("idornum","NT","","");
+			parse_tree.addNodeAsNT("idornum","NT","");
 			if(matchTerminal("intNum")) {
 				WriteDerivation("idornum -> 'intNum'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First2))
 		{
-			tree.addNode("idornum","NT","","");
+			parse_tree.addNodeAsNT("idornum","NT","");
 			if(expr()) {
 				WriteDerivation("assignStatTail		-> assignOp   expr");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -840,11 +843,11 @@ public class Parser {
 
 		if(isLookin(First1))
 		{
-			tree.addNode("assignStatTail","NT","","");
+			parse_tree.addNodeAsNT("assignStatTail","NT","");
 			if(assignOp() &&   expr() ) {
 				WriteDerivation("assignStatTail		-> assignOp   expr");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -872,50 +875,50 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("statementOther","NT","","");
+			parse_tree.addNodeAsNT("statementOther","NT","");
 			if(matchTerminal("if") && matchTerminal("(") &&  expr() && matchTerminal(")") && matchTerminal("then") && statBlock() && matchTerminal("else") &&  statBlock() &&   matchTerminal(";")) {
 				WriteDerivation("statementOther		->   'if' '(' expr ')' 'then'   statBlock   'else'   statBlock   ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("statementOther","NT","","");
+			parse_tree.addNodeAsNT("statementOther","NT","");
 			if(matchTerminal("for") && matchTerminal("(") && type() &&  matchTerminal("id") && assignOp() && matchTerminal("intNum") && matchTerminal(";") && relExpr() &&matchTerminal(";") && assignStat() && matchTerminal(")") && statBlock() && matchTerminal(";")) {
 				WriteDerivation("statementOther		->   'for' '(' type   'id'  assignOp expr ';' relExpr ';' assignStat ')' statBlock ';'"); 
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			} 
 			//else
 			//WriteErrors("Syntax Error at token number: " + TokenNumber + " ,For token: " + tok.toks[TokenNumber]);
 		}else if(isLookin(First3))
 		{  
-			tree.addNode("statementOther","NT","","");
+			parse_tree.addNodeAsNT("statementOther","NT","");
 			if(matchTerminal("read") && matchTerminal("(") && variable() && matchTerminal(")") && matchTerminal(";")) {
 				WriteDerivation("statementOther		->  'read' '(' variable ')' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First4))
 		{
-			tree.addNode("statementOther","NT","","");
+			parse_tree.addNodeAsNT("statementOther","NT","");
 			if(matchTerminal("write") && matchTerminal("(") && expr() && matchTerminal(")") && matchTerminal(";")) {
 				WriteDerivation("statementOther		->   'write' '(' expr ')' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First5))
 		{
-			tree.addNode("statementOther","NT","","");
+			parse_tree.addNodeAsNT("statementOther","NT","");
 			if(matchTerminal("return") && matchTerminal("(") && expr() && matchTerminal(")") && matchTerminal(";")) {
 				WriteDerivation("statementOther		->   'return' '(' expr ')' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -931,11 +934,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("statementList","NT","","");
+			parse_tree.addNodeAsNT("statementList","NT","");
 			if(statement() && statementList()) {
 				WriteDerivation("statementList 		-> statement statementList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -957,11 +960,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("arraySizeList","NT","","");
+			parse_tree.addNodeAsNT("arraySizeList","NT","");
 			if(arraySize() && arraySizeList()) {
 				WriteDerivation("arraySizeList		-> arraySize arraySizeList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -998,57 +1001,57 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("statement","NT","","");
+			parse_tree.addNodeAsNT("statement","NT","");
 			if(assignStat() && matchTerminal(";")) {
 				WriteDerivation("statement 			-> assignStat ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("statement","NT","","");
+			parse_tree.addNodeAsNT("statement","NT","");
 			if(matchTerminal("if") && matchTerminal("(") && expr() && matchTerminal(")") && matchTerminal("then") && statBlock() &&  matchTerminal("else") &&   statBlock() &&   matchTerminal(";")) {
 				WriteDerivation("statement 			->   'if' '(' expr ')' 'then'   statBlock   'else'   statBlock   ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First3))
 		{
-			tree.addNode("statement","NT","","");
+			parse_tree.addNodeAsNT("statement","NT","");
 			if(matchTerminal("for") && matchTerminal("(") && type() && matchTerminal("id") &&  assignOp() && expr() && matchTerminal(";") && relExpr() && matchTerminal(";") && assignStat() && matchTerminal(")") && statBlock() && matchTerminal(";")) {
 				WriteDerivation("statement 			->   'for' '(' type 'id'  assignOp expr ';' relExpr ';' assignStat ')' statBlock ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First4))
 		{
-			tree.addNode("statement","NT","","");
+			parse_tree.addNodeAsNT("statement","NT","");
 			if(matchTerminal("read") && matchTerminal("(") && variable() && matchTerminal(")") &&  matchTerminal(";")) {
 				WriteDerivation("statement 			->   'read' '(' variable ')' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First5))
 		{
-			tree.addNode("statement","NT","","");
+			parse_tree.addNodeAsNT("statement","NT","");
 			if(matchTerminal("write") && matchTerminal("(") && expr() && matchTerminal(")") && matchTerminal(";")) {
 				WriteDerivation("statement 			->   'write' '(' expr ')' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First6))
 		{
-			tree.addNode("statement","NT","","");
+			parse_tree.addNodeAsNT("statement","NT","");
 			if(matchTerminal("return") && matchTerminal("(") && expr() && matchTerminal(")") && matchTerminal(";")) {
 				WriteDerivation("statement 			->   'return' '(' expr ')' ';'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1063,11 +1066,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("assignStat","NT","","");
+			parse_tree.addNodeAsNT("assignStat","NT","");
 			if(variable() && assignOp() &&   expr() ) {
 				WriteDerivation("assignStat 			-> variable   assignOp   expr");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1087,21 +1090,21 @@ public class Parser {
 		Errorcheck(First,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("statBlock","NT","","");
+			parse_tree.addNodeAsNT("statBlock","NT","");
 			if(matchTerminal("{") && statementList() && matchTerminal("}")) {
 				WriteDerivation("fstatBlock 			-> '{' statementList '}'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true; 
 			}
 		} 
 		else if(isLookin(First2))
 		{
-			tree.addNode("statBlock","NT","","");
+			parse_tree.addNodeAsNT("statBlock","NT","");
 			if(statement()	) {
 				WriteDerivation("statBlock 			-> statement");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(Follow1))
@@ -1121,12 +1124,12 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("expr","NT","","");
+			parse_tree.addNodeAsNT("expr","NT","");
 			//			tree.exprNode.add(tree.tnode);
 			if(arithExpr() && exprNew() ) {
 				WriteDerivation("expr 				-> arithExpr exprNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1142,11 +1145,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("exprNew","NT","","");
+			parse_tree.addNodeAsNT("exprNew","NT","");
 			if(relOp() && arithExpr()) {
 				WriteDerivation("exprNew 			->   relOp arithExpr");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1166,11 +1169,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("relExpr","NT","","");
+			parse_tree.addNodeAsNT("relExpr","NT","");
 			if(arithExpr() &&   relOp() && arithExpr() ) {
 				WriteDerivation("relExpr 			-> arithExpr   relOp arithExpr");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1184,11 +1187,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("arithExpr","NT","","");
+			parse_tree.addNodeAsNT("arithExpr","NT","");
 			if(term() && arithExprNew() ) {
 				WriteDerivation("arithExpr 			-> term arithExprNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1203,11 +1206,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("arithExprNew","NT","","");
+			parse_tree.addNodeAsNT("arithExprNew","NT","");
 			if(addOp() && term() && arithExprNew()) {
 				WriteDerivation("arithExprNew 		->   addOp term arithExprNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1231,21 +1234,21 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("sign","NT","","");
+			parse_tree.addNodeAsNT("sign","NT","");
 			if(matchTerminal("+")) {
 				WriteDerivation("sign 				-> '+'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("sign","NT","","");
+			parse_tree.addNodeAsNT("sign","NT","");
 			if(matchTerminal("-")) {
 				WriteDerivation("sign 				-> '-'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1259,11 +1262,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("term","NT","","");
+			parse_tree.addNodeAsNT("term","NT","");
 			if(factor() && termNew() ) {
 				WriteDerivation("term 				-> factor termNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1278,11 +1281,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("termNew","NT","","");
+			parse_tree.addNodeAsNT("termNew","NT","");
 			if(multOp() && factor() && termNew()) {
 				WriteDerivation("termNew 			->   multOp factor termNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1318,56 +1321,56 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("factor","NT","","");
+			parse_tree.addNodeAsNT("factor","NT","");
 			if(varFunc()) {
 				WriteDerivation("factor 				->   varFunc");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First2))
 		{
-			tree.addNode("factor","NT","","");
+			parse_tree.addNodeAsNT("factor","NT","");
 			if(matchTerminal("intNum")) {
 				WriteDerivation("factor 				->   'intNum'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First3))
 		{
-			tree.addNode("factor","NT","","");
+			parse_tree.addNodeAsNT("factor","NT","");
 			if(matchTerminal("floatNum")) {
 				WriteDerivation("factor 				-> 'floatNum'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First4))
 		{
-			tree.addNode("factor","NT","","");
+			parse_tree.addNodeAsNT("factor","NT","");
 			if(matchTerminal("(") && arithExpr() && matchTerminal(")")) {
 				WriteDerivation("factor 				-> '(' arithExpr ')'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First5))
 		{
-			tree.addNode("factor","NT","","");
+			parse_tree.addNodeAsNT("factor","NT","");
 			if(matchTerminal("not") && factor()) {
 				WriteDerivation("factor 				-> not factor");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}	else if(isLookin(First6))
 		{
-			tree.addNode("factor","NT","","");
+			parse_tree.addNodeAsNT("factor","NT","");
 			if(sign() && factor()) {
 				WriteDerivation("factor 				-> sign factor");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1381,11 +1384,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("variable","NT","","");
+			parse_tree.addNodeAsNT("variable","NT","");
 			if(matchTerminal("id") &&  variableNew()) {
 				WriteDerivation("variable 			->   'id'   variableNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1405,21 +1408,21 @@ public class Parser {
 		Errorcheck(First,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("variableNew","NT","","");
+			parse_tree.addNodeAsNT("variableNew","NT","");
 			if(indiceList() && idnestList()) {
 				WriteDerivation("variableNew			->   indiceList idnestList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("variableNew","NT","","");
+			parse_tree.addNodeAsNT("variableNew","NT","");
 			if(matchTerminal("(") && aParams() && matchTerminal(")") && idnestList()) {
 				WriteDerivation("variableNew			-> '(' aParams ')' idnestList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(Follow1))
@@ -1438,11 +1441,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("varFunc","NT","","");
+			parse_tree.addNodeAsNT("varFunc","NT","");
 			if(matchTerminal("id") && indiceList() && idnestListNew() && varFuncTail() ) {
 				WriteDerivation("varFunc 			->   'id'     indiceList idnestListNew varFuncTail");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1458,11 +1461,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{ 
-			tree.addNode("varFuncTail","NT","","");
+			parse_tree.addNodeAsNT("varFuncTail","NT","");
 			if(matchTerminal("(") && aParams() && matchTerminal(")") &&  varFuncTail2()) {
 				WriteDerivation("varFuncTail			->   '(' aParams ')'  varFuncTail2");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1483,11 +1486,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("varFuncTail2","NT","","");
+			parse_tree.addNodeAsNT("varFuncTail2","NT","");
 			if(idnest()) {
 				WriteDerivation("varFuncTail2		-> idnest");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1508,11 +1511,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("idnestListNew","NT","","");
+			parse_tree.addNodeAsNT("idnestListNew","NT","");
 			if(idnestNew() && idnestListNew()) {
 				WriteDerivation("idnestListNew		-> idnestNew idnestListNew");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1540,20 +1543,20 @@ public class Parser {
 
 		if(isLookin(First1))
 		{
-			tree.addNode("indiceList","NT","","");
+			parse_tree.addNodeAsNT("indiceList","NT","");
 			if(indice() && indiceList()) {
 				WriteDerivation("indiceList			-> indice indiceList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First2))
 		{
-			tree.addNode("indiceList","NT","","");
+			parse_tree.addNodeAsNT("indiceList","NT","");
 			if(matchTerminal("(") && funcallPar()&& matchTerminal(")")) {
 				WriteDerivation("indiceList			-> indice indiceList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1575,11 +1578,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("funcallPar","NT","","");
+			parse_tree.addNodeAsNT("funcallPar","NT","");
 			if(aParams()) {
 				WriteDerivation("FuncallPar 			-> id");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(Follow1))
@@ -1599,11 +1602,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("idnestNew","NT","","");
+			parse_tree.addNodeAsNT("idnestNew","NT","");
 			if(matchTerminal(".") && idnestNewTail()) {
 				WriteDerivation("idnestNew 			-> '.' idnestNewTail");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1621,21 +1624,21 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{ 
-			tree.addNode("idnestNewTail","NT","","");
+			parse_tree.addNodeAsNT("idnestNewTail","NT","");
 			if(matchTerminal("id") && indiceList()) {
 				WriteDerivation("idnestNewTail		->   'id' indiceList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("idnestNewTail","NT","","");
+			parse_tree.addNodeAsNT("idnestNewTail","NT","");
 			if(matchTerminal("(") && aParams() && matchTerminal(")")) {
 				WriteDerivation("idnestNewTail		-> '(' aParams ')'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1650,11 +1653,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("indice","NT","","");
+			parse_tree.addNodeAsNT("indice","NT","");
 			if(matchTerminal("[") && arithExpr() && matchTerminal("]")) {
 				WriteDerivation("indice 				-> '[' arithExpr ']'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1669,11 +1672,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("idnestList","NT","","");
+			parse_tree.addNodeAsNT("idnestList","NT","");
 			if(idnest() && idnestList()) {
 				WriteDerivation("idnestList			-> idnest idnestList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1692,11 +1695,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("idnest","NT","","");
+			parse_tree.addNodeAsNT("idnest","NT","");
 			if(matchTerminal(".") && matchTerminal("id") && indiceList()) {
 				WriteDerivation("idnest 				-> '.'   'id' indiceList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1710,11 +1713,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("arraySize","NT","","");
+			parse_tree.addNodeAsNT("arraySize","NT","");
 			if(matchTerminal("[") &&  matchTerminal("intNum") && matchTerminal("]")) {
 				WriteDerivation("arraySize 			-> '['   'intNum' ']'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1735,30 +1738,30 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("type","NT","","");
+			parse_tree.addNodeAsNT("type","NT","");
 			if(matchTerminal("integer")) {
 				WriteDerivation("type 				->   'integer'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("type","NT","","");
+			parse_tree.addNodeAsNT("type","NT","");
 			if(matchTerminal("float")) {
 				WriteDerivation("type 				->   'float'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First3))
 		{
-			tree.addNode("type","NT","","");
+			parse_tree.addNodeAsNT("type","NT","");
 			if(matchTerminal("id")) {
 				WriteDerivation("type 				->   'id'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1773,12 +1776,12 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("fParamsSet","NT","","");
-			tree.fparmsNode.add(tree.currentNode);
+			parse_tree.addNodeAsNT("fParamsSet","NT","");
+			parse_tree.fparmsNode.add(parse_tree.current_parse_node);
 			if(type() && matchTerminal("id") && arraySizeList() && fParamsTailList()) {
 				WriteDerivation("fParamsSet 			->    type   'id'   arraySizeList     fParamsTailList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1799,11 +1802,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("fParamsTailList","NT","","");
+			parse_tree.addNodeAsNT("fParamsTailList","NT","");
 			if(fParamsTail() &&   fParamsTailList()) {
 				WriteDerivation("fParamsTailList		->   fParamsTail   fParamsTailList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1824,11 +1827,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("aParams","NT","","");
+			parse_tree.addNodeAsNT("aParams","NT","");
 			if(expr() && aParamsTailList()) {
 				WriteDerivation("aParams 			-> expr aParamsTailList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1849,11 +1852,11 @@ public class Parser {
 		Errorcheck(First1,Follow1);
 		if(isLookin(First1))
 		{
-			tree.addNode("aParamsTailList","NT","","");
+			parse_tree.addNodeAsNT("aParamsTailList","NT","");
 			if(aParamsTail() && aParamsTailList()) {
 				WriteDerivation("aParamsTailList		-> aParamsTail aParamsTailList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1873,11 +1876,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("fParamsTail","NT","","");
+			parse_tree.addNodeAsNT("fParamsTail","NT","");
 			if(matchTerminal(",") && type() &&   matchTerminal("id") &&   arraySizeList()) {
 				WriteDerivation("fParamsTail 		-> ',' type   'id'   arraySizeList");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1892,11 +1895,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("aParamsTail","NT","","");
+			parse_tree.addNodeAsNT("aParamsTail","NT","");
 			if(matchTerminal(",") && expr()) {
 				WriteDerivation("aParamsTail 		-> ',' expr");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1910,11 +1913,11 @@ public class Parser {
 		Errorcheck(First1);
 		if(isLookin(First1))
 		{
-			tree.addNode("assignOp","NT","","");
+			parse_tree.addNodeAsNT("assignOp","NT","");
 			if(matchTerminal("=")) {
 				WriteDerivation("aParamsTail 		-> ',' expr");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -1945,57 +1948,57 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("relOp","NT","","");
+			parse_tree.addNodeAsNT("relOp","NT","");
 			if(matchTerminal("eq")) {
 				WriteDerivation("relOp 				->   'eq'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("relOp","NT","","");
+			parse_tree.addNodeAsNT("relOp","NT","");
 			if(matchTerminal("neq")) {
 				WriteDerivation("relOp 				->   'neq'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First3))
 		{
-			tree.addNode("relOp","NT","","");
+			parse_tree.addNodeAsNT("relOp","NT","");
 			if(matchTerminal("lt")) {
 				WriteDerivation("relOp 				->   'lt'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First4))
 		{
-			tree.addNode("relOp","NT","","");
+			parse_tree.addNodeAsNT("relOp","NT","");
 			if(matchTerminal("gt")) {
 				WriteDerivation("relOp 				->   'gt'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First5))
 		{
-			tree.addNode("relOp","NT","","");
+			parse_tree.addNodeAsNT("relOp","NT","");
 			if(matchTerminal("leq")) {
 				WriteDerivation("relOp 				->   'leq'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First6))
 		{
-			tree.addNode("relOp","NT","","");
+			parse_tree.addNodeAsNT("relOp","NT","");
 			if(matchTerminal("geq")) {
 				WriteDerivation("relOp 				->   'geq'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}	
@@ -2016,30 +2019,30 @@ public class Parser {
 		Errorcheck(First);
 		if(isLookin(First1))
 		{
-			tree.addNode("addOp","NT","","");
+			parse_tree.addNodeAsNT("addOp","NT","");
 			if(matchTerminal("+")) {
 				WriteDerivation("addOp 				->   '+'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))	
 		{
-			tree.addNode("addOp","NT","","");
+			parse_tree.addNodeAsNT("addOp","NT","");
 			if(matchTerminal("-")) {
 				WriteDerivation("addOp 				->   '-'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First3))
 		{
-			tree.addNode("addOp","NT","","");
+			parse_tree.addNodeAsNT("addOp","NT","");
 			if(matchTerminal("or")) {
 				WriteDerivation("addOp 				->   'or'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
@@ -2060,30 +2063,30 @@ public class Parser {
 		Errorcheck(First);	
 		if(isLookin(First1))
 		{
-			tree.addNode("multOp","NT","","");
+			parse_tree.addNodeAsNT("multOp","NT","");
 			if(matchTerminal("*")) {
 				WriteDerivation("multOp 				->   '*'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}
 		else if(isLookin(First2))
 		{
-			tree.addNode("multOp","NT","","");
+			parse_tree.addNodeAsNT("multOp","NT","");
 			if(matchTerminal("/")) {
 				WriteDerivation("multOp 				->   '/'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}else if(isLookin(First3))
 		{
-			tree.addNode("multOp","NT","","");
+			parse_tree.addNodeAsNT("multOp","NT","");
 			if(matchTerminal("and")) {
 				WriteDerivation("multOp 				->   'and'");
 				System.out.println("look:" + lookahead);
-				tree.goUp();
+				parse_tree.goUp();
 				return true;
 			}
 		}

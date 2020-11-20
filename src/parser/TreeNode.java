@@ -4,7 +4,7 @@ import java.security.KeyStore.Entry.Attribute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class ASTNode {
+public class TreeNode {
 
 	String NodeName="";
 	String NodeKind="";
@@ -14,8 +14,8 @@ public class ASTNode {
 	String datatype="";
 	int NodeIndex=0;
 	String LineNumber=" ";
-	ASTNode parent;
-	ArrayList<ASTNode> children= new ArrayList<>();
+	TreeNode parent;
+	ArrayList<TreeNode> children= new ArrayList<>();
 //	ArrayList<Integer> ArraySize= new ArrayList<>();
 //	int ArrayDimension=0;
 //	ArrayList<String> InheritedList= new ArrayList<>(); 
@@ -28,18 +28,23 @@ public class ASTNode {
 //	String scopename="";
 //	String ReturnedType="";
 
-	public ASTNode(String pname, String pkind,String linenum) {
+	public TreeNode(String pname, String pkind,String linenum) {
 		NodeName = pname;
 		NodeKind = pkind;
 		type=data="";
 		LineNumber=linenum;
 
 	}
-	public ASTNode(String pname, String pkind) {
+	public TreeNode(String pname, String pkind) {
 		NodeName = pname;
 		NodeKind = pkind;
 		type=data="";
 
+	}
+	public TreeNode(TreeNode node) {
+		this.NodeName= node.NodeName;
+		this.NodeKind= node.NodeKind;
+		this.LineNumber=node.LineNumber;
 	}
 	public void addData(String pdata) {
 		data=pdata;

@@ -108,9 +108,9 @@ public class LexicalAnalyser {
 		else if(Character.isDigit(item)) {
 			buffer= stateDigit(Character.toString(item),item,linenum);
 			if(buffer.contains("."))
-				finalState("FLOAT",buffer,linenum);
+				finalState(buffer,"floatNum",linenum);
 			else
-				finalState("INTEGER",buffer,linenum);
+				finalState(buffer,"intNum",linenum);
 		}
 		else 
 			errorState("Invalid token: Remove this symbol to correct the error",Character.toString(item),linenum);
@@ -171,7 +171,7 @@ public class LexicalAnalyser {
 	private void statEQ(String item, int linenum) {
 		String next= peekElement();
 		if(next.equals("=")) {
-			finalState(item+"=",linenum);
+			finalState("eq",linenum);
 			updatePointer();
 		}
 		else

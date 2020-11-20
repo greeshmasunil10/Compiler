@@ -1,19 +1,19 @@
 Node				Kind				Token				Parent Node				Line				
-prog				NT				 				no parent								
+prog				NT								no parent								
 main				main				KEYWORD				prog				1				
 funcBody				NT								prog								
 {				{				Left Braces				funcBody				1				
 funcStatements				NT								funcBody								
 varStat				NT								funcStatements								
 typefloatorint				NT								varStat								
-integer				integer				KEYWORD				typefloatorint				2				
+float				float				KEYWORD				typefloatorint				2				
 id				id				IDENTIFIER				varStat				2				
 varDecl				NT								varStat								
 ;				;				Semicolon				varDecl				2				
 funcStatements				NT								funcStatements								
 varStat				NT								funcStatements								
 typefloatorint				NT								varStat								
-integer				integer				KEYWORD				typefloatorint				3				
+float				float				KEYWORD				typefloatorint				3				
 id				id				IDENTIFIER				varStat				3				
 varDecl				NT								varStat								
 ;				;				Semicolon				varDecl				3				
@@ -24,5 +24,38 @@ integer				integer				KEYWORD				typefloatorint				4
 id				id				IDENTIFIER				varStat				4				
 varDecl				NT								varStat								
 ;				;				Semicolon				varDecl				4				
-}				}				Right Braces				funcBody				5				
-;				;				Semicolon				prog				5				
+funcStatements				NT								funcStatements								
+varStatNew				NT								funcStatements								
+id				id				IDENTIFIER				varStatNew				5				
+varStatTail				NT								varStatNew								
+=				=				Assignment operator				varStatTail				5				
+expr				NT								varStatTail								
+arithExpr				NT								expr								
+term				NT								arithExpr								
+factor				NT								term								
+intNum				intNum				500				factor				5				
+;				;				Semicolon				varStatTail				5				
+funcStatNew				NT								funcStatements								
+varStatNew				NT								funcStatNew								
+id				id				IDENTIFIER				varStatNew				6				
+varStatTail				NT								varStatNew								
+=				=				Assignment operator				varStatTail				6				
+expr				NT								varStatTail								
+arithExpr				NT								expr								
+term				NT								arithExpr								
+factor				NT								term								
+intNum				intNum				9				factor				6				
+;				;				Semicolon				varStatTail				6				
+funcStatNew				NT								funcStatNew								
+varStatNew				NT								funcStatNew								
+id				id				IDENTIFIER				varStatNew				8				
+varStatTail				NT								varStatNew								
+=				=				Assignment operator				varStatTail				8				
+expr				NT								varStatTail								
+arithExpr				NT								expr								
+term				NT								arithExpr								
+factor				NT								term								
+intNum				intNum				5				factor				8				
+;				;				Semicolon				varStatTail				8				
+}				}				Right Braces				funcBody				10				
+;				;				Semicolon				prog				10				

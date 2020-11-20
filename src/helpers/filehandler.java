@@ -49,6 +49,7 @@ public class filehandler {
 	}
 	public void saveTable(JTable table)throws Exception
 	{
+		System.out.println(table);
 	  for(int i = 0 ; i < table.getColumnCount() ; i++)
 	  {
 	    bw.write(table.getColumnName(i));

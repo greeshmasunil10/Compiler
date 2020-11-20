@@ -1,6 +1,10 @@
 classDeclSet		-> EPSILON
 funcDefSet 		-> EPSILON
-typefloatorint				->   'integer'
+typefloatorint				->   'float'
+arraySizeList		-> EPSILON
+varDecl 			->   arraySizeList ';'
+varStat				-> typefloatorint   'id'   varDecl
+typefloatorint				->   'float'
 arraySizeList		-> EPSILON
 varDecl 			->   arraySizeList ';'
 varStat				-> typefloatorint   'id'   varDecl
@@ -8,11 +12,37 @@ typefloatorint				->   'integer'
 arraySizeList		-> EPSILON
 varDecl 			->   arraySizeList ';'
 varStat				-> typefloatorint   'id'   varDecl
-typefloatorint				->   'integer'
-arraySizeList		-> EPSILON
-varDecl 			->   arraySizeList ';'
-varStat				-> typefloatorint   'id'   varDecl
-funcStatements		-> EPSILON
+factor 				->   'intNum'
+termNew 			-> EPSILON
+term 				-> factor termNew
+arithExprNew 		-> EPSILON
+arithExpr 			-> term arithExprNew
+exprNew 			-> EPSILON
+expr 				-> arithExpr exprNew
+varStatTail    -> '=' idornum ';'
+varStatNew			->   'id' varStatTail
+factor 				->   'intNum'
+termNew 			-> EPSILON
+term 				-> factor termNew
+arithExprNew 		-> EPSILON
+arithExpr 			-> term arithExprNew
+exprNew 			-> EPSILON
+expr 				-> arithExpr exprNew
+varStatTail    -> '=' idornum ';'
+varStatNew			->   'id' varStatTail
+factor 				->   'intNum'
+termNew 			-> EPSILON
+term 				-> factor termNew
+arithExprNew 		-> EPSILON
+arithExpr 			-> term arithExprNew
+exprNew 			-> EPSILON
+expr 				-> arithExpr exprNew
+varStatTail    -> '=' idornum ';'
+varStatNew			->   'id' varStatTail
+funcStatNew	-> EPSILON
+funcStatNew	-> varStatNew funcStatNew
+funcStatNew	-> varStatNew funcStatNew
+funcStatements		-> varStatNew funcStatNew
 funcStatements		-> varStat funcStatements
 funcStatements		-> varStat funcStatements
 funcStatements		-> varStat funcStatements
